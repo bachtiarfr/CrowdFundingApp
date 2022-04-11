@@ -24,7 +24,7 @@ func (s *service) RegisterUser(input UserInputRegister) (User, error) {
 	user.Occupation = input.Occupation
 	user.Email = input.Email
 	
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.PasswordHash), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
 		return user, err
@@ -32,7 +32,6 @@ func (s *service) RegisterUser(input UserInputRegister) (User, error) {
 
 	user.PasswordHash = string(passwordHash)
 
-	user.AvatarFileName = input.AvatarFileName
 	user.Role = "user"
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
