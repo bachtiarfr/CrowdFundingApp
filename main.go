@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bwastartup/handler"
 	"bwastartup/user"
 	"log"
 
@@ -10,57 +11,30 @@ import (
 )
 
 func main() {
-	// dsn := "root:@tcp(127.0.0.1:3306)/bwastartup?charset=utf8mb4&parseTime=True&loc=Local"
-	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	// /*
-	// * connection to mysql
-	// */
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
-	// fmt.Println("Connected to database")
-
-	// /* 
-	// * get user data from struck user
-	// */
-	// var users []user.User
-	// db.Find(&users)
 	
-	// /* 
-	// * loop through user data
-	// */
-	// for _, dataUser := range users {
-	// 	fmt.Println(dataUser.Name)
-	// }
-
-	/* 
-	* create new router
-	*/
-	router := gin.Default()
-	router.GET("/", controller)
-	router.Run()
-}
-
-/* 
-* Routing controller
-*/
-func controller(c *gin.Context) {
-	dsn := "root:@tcp(127.0.0.1:3306)/bwastartup?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
 	/*
 	* connection to mysql
 	*/
+	dsn := "root:@tcp(127.0.0.1:3306)/bwastartup?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	/* 
-	* get user data from struck user
+	* collect the user repository
 	*/
-	var users []user.User
-	db.Find(&users)
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
+
+	userHandler := handler.NewUserHandler(userService)
+
+	router := gin.Default()
 	
-	c.JSON(200, users)
+	api := router.Group("/api/v1")
+	api.POST("/users", userHandler.RegisterUser)
+	api.POST("/login", userHandler.LoginUser)
+
+	router.Run()
+
 }
